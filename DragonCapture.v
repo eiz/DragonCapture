@@ -136,8 +136,8 @@ reg [35:0] dpd = 0;  // Data Pointer Data (*DP)
 wire [35:0] dpdr; // Data Pointer Data Read
 reg endp = 0;        // Data Pointer Write Enable
 
-reg [9:0] dst = 0;            // Data Stack Top
-wire [9:0] dsp = dst - 1'b1;  // Data Stack Previous
+reg [8:0] dst = 0;            // Data Stack Top
+wire [8:0] dsp = dst - 1'b1;  // Data Stack Previous
 reg [35:0] dstd = 0;          // Data Stack Top Data
 wire [35:0] dstdr;        // Data Stack Top Data Read
 reg [35:0] dspd = 0;          // Data Stack Previous Data
@@ -145,7 +145,7 @@ wire [35:0] dspdr;        // Data Stack Previous Data Read
 reg endst = 0;                // Data Stack Top Write Enable
 reg endsp = 0;                // Data Stack Previous Write Enable
 
-reg [9:0] rst = 0;    // Return Stack Top
+reg [8:0] rst = 0;    // Return Stack Top
 reg [35:0] rstd = 0;  // Return Stack Top Data
 wire [35:0] rstdr; // Return Stack Top Data Read
 reg enrst = 0;        // Return Stack Top Write Enable
@@ -170,11 +170,11 @@ DragonRAM #(.WordCount(1024), .SourceFile("ram.bin")) RAM(
 	.Address0(dp),
 	.Address1(pc),
 	.Data0Write(dpd),
-	.Data1Write(pcd),
+	.Data1Write(36'b0),
 	.Data0Read(dpdr),
 	.Data1Read(pcdr));
 	
-DragonRAM #(.WordCount(512)) DataStack(
+DragonRAM #(.WordCount(512), .AddressWidth(9)) DataStack(
 	.Clock(Clock),
 	.WriteEnable0(endst),
 	.WriteEnable1(endsp),
@@ -185,12 +185,12 @@ DragonRAM #(.WordCount(512)) DataStack(
 	.Data0Read(dstdr),
 	.Data1Read(dspdr));
 	
-DragonRAM #(.WordCount(512)) ReturnStack(
+DragonRAM #(.WordCount(512), .AddressWidth(9)) ReturnStack(
 	.Clock(Clock),
 	.WriteEnable0(enrst),
 	.WriteEnable1(1'b0),
 	.Address0(rst),
-	.Address1(10'b0),
+	.Address1(9'b0),
 	.Data0Write(rstd),
 	.Data1Write(36'b0),
 	.Data0Read(rstdr),
@@ -208,11 +208,11 @@ always @(posedge Clock) case (stage)
 		poprs <= 0;
 		setpc <= 0;
 		setdpd <= 0;
-		pcd <= pcdr;
 		stage <= `CORE_STAGE_DECODE;
 	end
 	`CORE_STAGE_DECODE: begin
 		pc <= pc + 1'b1;
+		pcd <= pcdr;
 		stage <= `CORE_STAGE_EXECUTE;
 		dpd <= dpdr;
 		dstd <= dstdr;
@@ -245,15 +245,15 @@ always @(posedge Clock) case (stage)
 			end
 			`CORE_INSN_RET: begin
 				poprs <= 1;
-				newpc <= rstd;
+				newpc <= rstd[9:0];
 				setpc <= 1;
 			end
 			`CORE_INSN_IMM32: begin
-				dstd <= pc[31:0];
+				dstd <= pcd[31:0];
 				pshds <= 1;
 			end
 			`CORE_INSN_STORE: begin
-				dp <= dstd;
+				dp <= dstd[9:0];
 				dpd <= dspd;
 				setdpd <= 1;
 			end
@@ -277,6 +277,11 @@ always @(posedge Clock) case (stage)
 			enrst <= 1;
 		end
 		
+		if (pshds) begin
+			dst <= dst + 1'b1;
+			endst <= 1;
+		end
+		
 		if (setpc) begin
 			pc <= newpc;
 		end
@@ -289,11 +294,12 @@ endmodule
 
 module DragonRAM(
 	input Clock, WriteEnable0, WriteEnable1,
-	input [9:0] Address0, Address1,
+	input [AddressWidth - 1:0] Address0, Address1,
 	input [35:0] Data0Write, Data1Write,
 	output reg [35:0] Data0Read, output reg [35:0] Data1Read
 );
 
+parameter AddressWidth = 10;
 parameter WordCount = 1024;
 parameter SourceFile = "";
 

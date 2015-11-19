@@ -27,11 +27,6 @@
 (define (op-dup)
   (opcode #xA))
 
-(define blinky1
-  (vector-immutable
-   (op-imm32 1)
-   (op-out)))
-
 (define bootrom
   (vector-immutable
    (op-imm32 20)
@@ -61,5 +56,5 @@
     #:exists 'replace))
 
 (write-initial-memory
- blinky1
+ bootrom
  "C:/cygwin/home/eiz/DragonCapture/ram.bin")
