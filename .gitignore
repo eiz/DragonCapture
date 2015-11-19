@@ -261,4 +261,11 @@ webtalk_pn.xml
 par_usage_statistics.html
 usage_statistics_webtalk.html
 xlnx*/
+isim/
+isim.cmd
 
+fuse.xmsgs
+fuseRelaunch.cmd
+*_isim_beh.*
+ram.bin
+xilinxsim.ini
