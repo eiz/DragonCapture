@@ -269,3 +269,5 @@ fuseRelaunch.cmd
 *_isim_beh.*
 ram.bin
 xilinxsim.ini
+*.bak
+
