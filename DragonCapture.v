@@ -20,7 +20,7 @@ wire satisfied = dstack[dtop] != 0;
 initial
 begin : init_blk
 	reg [31:0] k;
-	
+
 	$readmemh("ram.bin", ram, 0, 1023);
 	for (k = 0; k < 64; k = k + 1) begin
 		dstack[k] = 0;
@@ -239,7 +239,7 @@ always @(posedge Clock) case (stage)
 				blinky <= dstd != 0;
 			`CORE_INSN_CALL: begin
 				rstd <= pc;
-				newpc <= pc[9:0];
+				newpc <= pcd[9:0];
 				setpc <= 1;
 				pshrs <= 1;
 			end
@@ -261,14 +261,18 @@ always @(posedge Clock) case (stage)
 				dstd <= dpd;
 				pshds <= 1;
 			end
-			`CORE_INSN_IF: error <= 1;
+			`CORE_INSN_IF: begin
+				popds <= 1;
+				setpc <= dstd != 0;
+				newpc <= (pcd[10] ? pc + pcd[9:0] : pc - pcd[9:0]);
+			end
 			`CORE_INSN_EQ: error <= 1;
 			`CORE_INSN_ADD: error <= 1;
 			`CORE_INSN_DUP: error <= 1;
 			default:
 				error <= 1;
 		endcase
-		
+
 		stage <= `CORE_STAGE_STORE;
 	end
 	`CORE_STAGE_STORE: begin
@@ -276,16 +280,20 @@ always @(posedge Clock) case (stage)
 			rst <= rst + 1'b1;
 			enrst <= 1;
 		end
-		
+
 		if (pshds) begin
 			dst <= dst + 1'b1;
 			endst <= 1;
 		end
-		
+
+		if (popds) begin
+			dst <= dst - 1'b1;
+		end
+
 		if (setpc) begin
 			pc <= newpc;
 		end
-		
+
 		stage <= `CORE_STAGE_FETCH;
 	end
 endcase
@@ -307,7 +315,7 @@ reg [35:0] ram [0:WordCount - 1];
 initial
 begin : init_blk
 	integer i;
-	
+
 	if (SourceFile != "")
 		$readmemh(SourceFile, ram, 0, WordCount - 1);
 	else
@@ -320,7 +328,7 @@ always @(posedge Clock) begin
 		ram[Address0] <= Data0Write;
 	else
 		Data0Read <= ram[Address0];
-	
+
 	if (WriteEnable1)
 		ram[Address1] <= Data1Write;
 	else
