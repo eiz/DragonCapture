@@ -173,7 +173,7 @@ DragonRAM #(.WordCount(1024), .SourceFile("ram.bin")) RAM(
 	.Data1Write(36'b0),
 	.Data0Read(dpdr),
 	.Data1Read(pcdr));
-	
+
 DragonRAM #(.WordCount(512), .AddressWidth(9)) DataStack(
 	.Clock(Clock),
 	.WriteEnable0(endst),
@@ -184,7 +184,7 @@ DragonRAM #(.WordCount(512), .AddressWidth(9)) DataStack(
 	.Data1Write(dspd),
 	.Data0Read(dstdr),
 	.Data1Read(dspdr));
-	
+
 DragonRAM #(.WordCount(512), .AddressWidth(9)) ReturnStack(
 	.Clock(Clock),
 	.WriteEnable0(enrst),

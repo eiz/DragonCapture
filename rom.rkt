@@ -30,6 +30,8 @@
 (define blinky1
   (vector-immutable
    (op-imm32 1)
+   (op-out)
+   (op-imm32 0)
    (op-out)))
 
 (define bootrom
@@ -60,6 +62,4 @@
                     0))))
     #:exists 'replace))
 
-(write-initial-memory
- blinky1
- "C:/cygwin/home/eiz/DragonCapture/ram.bin")
+(write-initial-memory blinky1 "ram.bin")
