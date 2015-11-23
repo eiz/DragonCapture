@@ -32,7 +32,9 @@
    (op-imm32 1)
    (op-out)
    (op-imm32 0)
-   (op-out)))
+   (op-out)
+   (op-imm32 1)
+   (op-if -2)))
 
 (define bootrom
   (vector-immutable

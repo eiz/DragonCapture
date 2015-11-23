@@ -2,7 +2,7 @@ module DragonCaptureTB;
 
 reg Clock = 0;
 wire [1:0] LED;
-always #5 Clock = !Clock;
+always #20 Clock = !Clock;
 
 DragonCapture CaptureDevice(
     .InternalClock(Clock),
