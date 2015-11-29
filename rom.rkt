@@ -36,6 +36,17 @@
    (op-imm32 1)
    (op-if -2)))
 
+(define add-test
+  (vector-immutable
+   (op-imm32 1)
+   (op-imm32 1)
+   (op-add)
+   (op-imm32 2)
+   (op-eq)
+   (op-out)
+   (op-imm32 1)
+   (op-if -2)))
+
 (define bootrom
   (vector-immutable
    (op-imm32 20)
@@ -64,4 +75,4 @@
                     0))))
     #:exists 'replace))
 
-(write-initial-memory blinky1 "ram.bin")
+(write-initial-memory add-test "ram.bin")
