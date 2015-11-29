@@ -266,7 +266,9 @@ always @(posedge Clock) case (stage)
                 dst <= dstd == dspd;
             end
 			`CORE_INSN_ADD: begin
-                error <= 1;
+                popds <= 1;
+                setdst <= 1;
+                dst <= dstd + dspd;
             end
 			`CORE_INSN_DUP: begin
                 error <= 1;
